@@ -1,16 +1,16 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Autobots | Concesionario de Vehículos</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 
   <header>
     <div class="logo">
-      <img class="logo-icon" src="img/logo.png" alt="Logo Autobots">
+      <img class="logo-icon" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Autobots">
       Autobots
     </div>
     <nav>
@@ -32,17 +32,17 @@
       <p>Consulta nuestros vehículos y sus características</p>
       <a class="btn">VER VEHÍCULOS</a>
     </div>
-        <div class="hero-img">
-      <img src="img/hero.jpg" alt="Vehículo destacado">
+    <div class="hero-img">
+      <img src="{{ url_for('static', filename='img/hero.jpg') }}" alt="Vehículo destacado">
     </div>
   </section>
 
-    <section class="destacados">
+  <section class="destacados">
     <h2>VEHÍCULOS DESTACADOS</h2>
     <div class="cards">
       <div class="card">
         <div class="card-img">
-          <img src="img/corolla.png" alt="Toyota Corolla">
+          <img src="{{ url_for('static', filename='img/corolla.png') }}" alt="Toyota Corolla">
         </div>
         <div class="card-body">
           <h3>Toyota Corolla</h3>
@@ -52,7 +52,7 @@
       </div>
       <div class="card">
         <div class="card-img">
-          <img src="img/mazda.png" alt="Mazda MX-5">
+          <img src="{{ url_for('static', filename='img/mazda.png') }}" alt="Mazda MX-5">
         </div>
         <div class="card-body">
           <h3>Mazda MX-5</h3>
@@ -62,8 +62,7 @@
       </div>
       <div class="card">
         <div class="card-img">
-          
-          <img src="img/equinox.png" alt="Chevrolet Equinox">
+          <img src="{{ url_for('static', filename='img/equinox.png') }}" alt="Chevrolet Equinox">
         </div>
         <div class="card-body">
           <h3>Chevrolet Equinox</h3>
