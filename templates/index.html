@@ -14,39 +14,21 @@
     </div>
   </section>
 
-  <section class="destacados">
+    <section class="destacados">
     <h2>VEHÍCULOS DESTACADOS</h2>
     <div class="cards">
+      {% for v in destacados %}
       <div class="card">
         <div class="card-img">
-          <img src="{{ url_for('static', filename='img/corolla.png') }}" alt="Toyota Corolla">
+          <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
         </div>
         <div class="card-body">
-          <h3>Toyota Corolla</h3>
-          <div class="year">2024</div>
+          <h3>{{ v.marca }} {{ v.modelo }}</h3>
+          <div class="year">{{ v.anio }}</div>
           <a class="btn">DETALLES</a>
         </div>
       </div>
-      <div class="card">
-        <div class="card-img">
-          <img src="{{ url_for('static', filename='img/mazda.png') }}" alt="Mazda MX-5">
-        </div>
-        <div class="card-body">
-          <h3>Mazda MX-5</h3>
-          <div class="year">2025</div>
-          <a class="btn">DETALLES</a>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-img">
-          <img src="{{ url_for('static', filename='img/equinox.png') }}" alt="Chevrolet Equinox">
-        </div>
-        <div class="card-body">
-          <h3>Chevrolet Equinox</h3>
-          <div class="year">2024</div>
-          <a class="btn">DETALLES</a>
-        </div>
-      </div>
+      {% endfor %}
     </div>
   </section>
 
