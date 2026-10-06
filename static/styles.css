@@ -211,3 +211,6 @@
   border-radius: inherit;
   display: block;
 }
+.buscador{ display:flex; align-items:center; gap:6px; }
+.buscador input{ padding:8px 12px; border:1px solid var(--gris-borde); border-radius:4px; font:inherit; width:180px; }
+.buscador button{ background:none; border:none; cursor:pointer; font-size:1.2rem; }

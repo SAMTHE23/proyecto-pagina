@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block titulo %}Catálogo{% endblock %}
+
+{% block contenido %}
+  <section class="destacados">
+    {% if busqueda %}
+      <h2>RESULTADOS PARA "{{ busqueda }}"</h2>
+    {% else %}
+      <h2>CATÁLOGO DE VEHÍCULOS</h2>
+    {% endif %}
+    <div class="cards">
+      {% for v in vehiculos %}
+      <div class="card">
+        <div class="card-img">
+          <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
+        </div>
+        <div class="card-body">
+          <h3>{{ v.marca }} {{ v.modelo }}</h3>
+          <div class="year">{{ v.anio }} · {{ v.tipo }}</div>
+          <a class="btn">DETALLES</a>
+        </div>
+      </div>
+      {% else %}
+      <p>No encontramos vehículos con esa búsqueda.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

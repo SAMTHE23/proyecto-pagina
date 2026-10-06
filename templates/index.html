@@ -1,36 +1,13 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Autobots | Concesionario de Vehículos</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
 
-  <header>
-    <div class="logo">
-      <img class="logo-icon" src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo Autobots">
-      Autobots
-    </div>
-    <nav>
-      <ul>
-        <li><a>Inicio</a></li>
-        <li><a>Catálogo</a></li>
-        <li><a>Servicios</a></li>
-        <li><a>Contacto</a></li>
-      </ul>
-    </nav>
-    <div class="header-right">
-      <span class="search-icon">&#128269;</span>
-    </div>
-  </header>
+{% block titulo %}Inicio{% endblock %}
 
+{% block contenido %}
   <section class="hero">
     <div class="hero-text">
       <h1>ENCUENTRA TU<br><span>PRÓXIMO</span><br>VEHÍCULO</h1>
       <p>Consulta nuestros vehículos y sus características</p>
-      <a class="btn">VER VEHÍCULOS</a>
+      <a class="btn" href="{{ url_for('catalogo') }}">VER VEHÍCULOS</a>
     </div>
     <div class="hero-img">
       <img src="{{ url_for('static', filename='img/hero.jpg') }}" alt="Vehículo destacado">
@@ -93,10 +70,4 @@
       </div>
     </div>
   </section>
-
-  <footer>
-    &copy; 2026 Autobots
-  </footer>
-
-</body>
-</html>
+{% endblock %}
