@@ -364,3 +364,13 @@
 .aviso.ok{ background:#e8f5e9; color:#1b5e20; border:1px solid #a5d6a7; }
 .aviso.error{ background:#fdecea; color:var(--rojo-oscuro); border:1px solid #f5b5b0; }
 @media (max-width:600px){ .campo-doble{ grid-template-columns:1fr; } .hero-izq{ padding-left:20px; padding-right:20px; } }
+
+i.mant-icono{
+  display:inline-block;
+  align-self:flex-start;
+  width:auto;
+  height:auto;
+  font-size:26px;
+  line-height:1;
+  color:var(--rojo);
+}
