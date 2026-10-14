@@ -19,7 +19,7 @@
         <li><a href="{{ url_for('home') }}">Inicio</a></li>
         <li><a href="{{ url_for('catalogo') }}">Catálogo</a></li>
         <li><a href="{{ url_for('servicios') }}">Servicios</a></li>
-        <li><a href="#">Contacto</a></li>
+        <li><a href="{{ url_for('contacto') }}">Contacto</a></li>
       </ul>
     </nav>
     <div class="header-right">
@@ -43,7 +43,10 @@
     <div class="footer-links">
       <a href="{{ url_for('home') }}">Inicio</a>
       <a href="{{ url_for('catalogo') }}">Catálogo</a>
+      <a href="{{ url_for('servicios') }}">Servicios</a>
+      <a href="{{ url_for('contacto') }}">Contacto</a>
     </div>
+    
     <hr class="footer-divisor">
     &copy; 2026 Autobots
   </footer>

@@ -1,10 +1,15 @@
-from flask import Flask, render_template, request
-from repositories import VehiculoRepository
+from flask import Flask, flash, redirect, render_template, request, url_for
+
+from repositories import ContactoRepository, VehiculoRepository
+from services import MOTIVOS, SERVICIOS, ContactoService
 
 NOMBRE_SITIO = "Autobots"
 
 app = Flask(__name__)
+app.secret_key = "cambia-esta-clave-en-produccion"  # necesaria para flash()
+
 vehiculos_repo = VehiculoRepository()
+contacto_service = ContactoService(ContactoRepository())
 
 
 @app.get("/")
@@ -17,9 +22,26 @@ def catalogo():
     busqueda = request.args.get("q", "").strip()
     return render_template("catalogo.html", vehiculos=vehiculos_repo.listar(busqueda), busqueda=busqueda)
 
+
 @app.get("/servicios")
 def servicios():
     return render_template("servicios.html")
+
+
+@app.route("/contacto", methods=["GET", "POST"])
+def contacto():
+    if request.method == "POST":
+        datos, errores = contacto_service.registrar(request.form)
+        if errores:
+            for e in errores:
+                flash(e, "error")
+            return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos), 400
+        flash("¡Gracias! Recibimos tu solicitud y te contactaremos pronto.", "ok")
+        return redirect(url_for("contacto"))  # evita reenviar el formulario al refrescar
+
+    # GET: permite llegar desde Servicios con el formulario ya preseleccionado
+    datos = {"motivo": request.args.get("motivo", ""), "servicio": request.args.get("servicio", "")}
+    return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos)
 
 
 if __name__ == "__main__":

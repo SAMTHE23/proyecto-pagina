@@ -35,6 +35,12 @@ class Database:
                 "CREATE TABLE IF NOT EXISTS vehiculos ("
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, marca TEXT, modelo TEXT, "
                 "anio INTEGER, tipo TEXT, imagen TEXT)")
+            con.execute(
+                "CREATE TABLE IF NOT EXISTS contactos ("
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, nombre TEXT NOT NULL, "
+                "telefono TEXT NOT NULL, correo TEXT, motivo TEXT NOT NULL, "
+                "servicio TEXT, fecha TEXT, mensaje TEXT, "
+                "creado TEXT DEFAULT CURRENT_TIMESTAMP)")
             if con.execute("SELECT COUNT(*) FROM vehiculos").fetchone()[0] == 0:
                 con.executemany(
                     "INSERT INTO vehiculos (marca, modelo, anio, tipo, imagen) VALUES (?,?,?,?,?)",

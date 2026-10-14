@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block titulo %}Contacto{% endblock %}
+
+{% block contenido %}
+  <section class="mant-hero hero-izq">
+    <h1>Contáctanos</h1>
+    <span class="mant-linea" aria-hidden="true"></span>
+    <p class="mant-subtitulo">CONSULTAS, COTIZACIONES Y CITAS DE MANTENIMIENTO</p>
+    <p class="mant-ayuda">Cuéntanos qué necesitas y te responderemos pronto</p>
+  </section>
+
+  <section class="contacto-contenido">
+    {% for categoria, msg in get_flashed_messages(with_categories=true) %}
+      <p class="aviso {{ categoria }}">{{ msg }}</p>
+    {% endfor %}
+
+    <form class="formulario" method="post" action="{{ url_for('contacto') }}">
+      <div class="campo">
+        <label for="motivo">Motivo *</label>
+        <select id="motivo" name="motivo" required>
+          <option value="">Selecciona...</option>
+          {% for m in motivos %}
+          <option value="{{ m }}" {{ 'selected' if datos.motivo == m }}>{{ m }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="campo-doble">
+        <div class="campo">
+          <label for="nombre">Nombre *</label>
+          <input id="nombre" name="nombre" value="{{ datos.nombre or '' }}" required>
+        </div>
+        <div class="campo">
+          <label for="telefono">Teléfono *</label>
+          <input id="telefono" name="telefono" value="{{ datos.telefono or '' }}" required>
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="correo">Correo</label>
+        <input id="correo" type="email" name="correo" value="{{ datos.correo or '' }}">
+      </div>
+
+      <div id="bloque-cita" class="campo-doble">
+        <div class="campo">
+          <label for="servicio">Servicio</label>
+          <select id="servicio" name="servicio">
+            <option value="">Selecciona...</option>
+            {% for s in servicios %}
+            <option value="{{ s }}" {{ 'selected' if datos.servicio == s }}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fecha">Fecha deseada</label>
+          <input id="fecha" type="date" name="fecha" value="{{ datos.fecha or '' }}">
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" name="mensaje" rows="4">{{ datos.mensaje or '' }}</textarea>
+      </div>
+
+      <button class="btn btn-form" type="submit">ENVIAR</button>
+    </form>
+  </section>
+  <hr class="divisor">
+
+  <script>
+    // Muestra servicio y fecha solo cuando el motivo es "Agendar mantenimiento"
+    const motivo = document.getElementById("motivo");
+    const bloque = document.getElementById("bloque-cita");
+    function alternar() {
+      bloque.style.display = motivo.value === "Agendar mantenimiento" ? "grid" : "none";
+    }
+    motivo.addEventListener("change", alternar);
+    alternar();
+  </script>
+{% endblock %}
