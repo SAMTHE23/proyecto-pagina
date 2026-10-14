@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Contacto{% endblock %}
+
+{% block content %}
+<style>
+  .contacto-pagina {
+    --c-rojo: #d30000;
+    --c-rojo-oscuro: #a80000;
+    --c-texto: #111111;
+    --c-borde: #d9d9d9;
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  .contacto-pagina *,
+  .contacto-pagina *::before,
+  .contacto-pagina *::after { box-sizing: border-box; }
+
+  .contacto-pagina .c-tarjeta {
+    width: 100%;
+    max-width: 580px;
+    background: #fff;
+    color: var(--c-texto);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+  }
+
+  .contacto-pagina .c-encabezado {
+    background: var(--c-rojo);
+    border-bottom: 3px solid var(--c-rojo-oscuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 14px 20px;
+  }
+
+  .contacto-pagina .c-icono-usuario { width: 42px; height: 42px; flex-shrink: 0; }
+
+  .contacto-pagina .c-encabezado h1 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .contacto-pagina .c-cuerpo { padding: 28px 28px 8px; }
+
+  .contacto-pagina .c-cuerpo h2 {
+    margin: 0 0 28px;
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--c-texto);
+  }
+
+  .contacto-pagina .c-campo { display: flex; align-items: center; margin-bottom: 22px; }
+  .contacto-pagina .c-campo.vertical { flex-direction: column; align-items: stretch; }
+
+  .contacto-pagina .c-etiqueta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: 160px;
+    flex-shrink: 0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--c-texto);
+  }
+
+  .contacto-pagina .c-campo.vertical .c-etiqueta { margin-bottom: 12px; }
+
+  .contacto-pagina svg.c-ico {
+    width: 28px;
+    height: 28px;
+    stroke: var(--c-rojo);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  .contacto-pagina input,
+  .contacto-pagina select,
+  .contacto-pagina textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.85rem;
+    color: var(--c-texto);
+    background: #fff;
+    border: 1px solid var(--c-borde);
+    border-radius: 10px;
+    padding: 13px 16px;
+    margin: 0;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .contacto-pagina input::placeholder,
+  .contacto-pagina textarea::placeholder { color: #888; }
+
+  .contacto-pagina input:focus,
+  .contacto-pagina select:focus,
+  .contacto-pagina textarea:focus {
+    border-color: var(--c-rojo);
+    box-shadow: 0 0 0 3px rgba(211, 0, 0, 0.15);
+  }
+
+  .contacto-pagina select {
+    appearance: none;
+    -webkit-appearance: none;
+    color: #555;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23111' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .contacto-pagina textarea { min-height: 130px; resize: vertical; }
+
+  .contacto-pagina .c-boton-wrap { display: flex; justify-content: center; margin: 26px 0 28px; }
+
+  .contacto-pagina .c-boton {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--c-rojo);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 14px 44px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .contacto-pagina .c-boton:hover { background: var(--c-rojo-oscuro); }
+  .contacto-pagina .c-boton:focus-visible { outline: 3px solid #000; outline-offset: 2px; }
+
+  .contacto-pagina .c-boton svg {
+    width: 22px;
+    height: 22px;
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .contacto-pagina .c-info {
+    border-top: 1px solid var(--c-borde);
+    margin: 0 24px;
+    padding: 18px 0 24px;
+    list-style: none;
+  }
+
+  .contacto-pagina .c-info li {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 8px 0;
+    color: var(--c-texto);
+  }
+
+  .contacto-pagina .c-info svg.c-ico { width: 24px; height: 24px; }
+
+  @media (max-width: 520px) {
+    .contacto-pagina .c-cuerpo { padding: 22px 18px 4px; }
+    .contacto-pagina .c-campo:not(.vertical) { flex-direction: column; align-items: stretch; }
+    .contacto-pagina .c-campo:not(.vertical) .c-etiqueta { width: auto; margin-bottom: 10px; }
+    .contacto-pagina .c-encabezado h1 { font-size: 1.5rem; }
+  }
+</style>
+
+<main class="contacto-pagina">
+  <section class="c-tarjeta">
+
+    <header class="c-encabezado">
+      <svg class="c-icono-usuario" viewBox="0 0 48 48" aria-hidden="true">
+        <circle cx="24" cy="24" r="22" fill="#000"/>
+        <circle cx="24" cy="24" r="22" fill="none" stroke="#fff" stroke-width="2.5"/>
+        <circle cx="24" cy="18" r="6.5" fill="none" stroke="#fff" stroke-width="2.5"/>
+        <path d="M11.5 38c1.5-7 6.5-10 12.5-10s11 3 12.5 10" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <h1>Contacto</h1>
+    </header>
+
+    <div class="c-cuerpo">
+      <h2>¿Tienes alguna pregunta?</h2>
+
+      <form id="formulario-contacto">
+
+        <div class="c-campo">
+          <label class="c-etiqueta" for="nombre">
+            <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="4.5"/><path d="M3 22c0-5 4-8 9-8s9 3 9 8z"/></svg>
+            Nombre:
+          </label>
+          <input type="text" id="nombre" name="nombre" placeholder="Ingresa tu nombre" required>
+        </div>
+
+        <div class="c-campo">
+          <label class="c-etiqueta" for="correo">
+            <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4.5" width="20" height="15" rx="2"/><polyline points="2.5 6 12 13.5 21.5 6"/></svg>
+            Correo:
+          </label>
+          <input type="email" id="correo" name="correo" placeholder="Ingresa tu correo" required>
+        </div>
+
+        <div class="c-campo">
+          <label class="c-etiqueta" for="motivo">
+            <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.5-2.8 4.3"/><circle cx="12" cy="17.8" r="0.6" fill="#d30000"/></svg>
+            Motivo:
+          </label>
+          <select id="motivo" name="motivo" required>
+            <option value="" disabled selected>Seleccionar motivo</option>
+            <option value="consulta">Consulta general</option>
+            <option value="soporte">Soporte</option>
+            <option value="ventas">Ventas</option>
+            <option value="sugerencia">Sugerencia</option>
+            <option value="otro">Otro</option>
+          </select>
+        </div>
+
+        <div class="c-campo vertical">
+          <label class="c-etiqueta" for="mensaje">
+            <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><circle cx="8" cy="10.5" r="0.7" fill="#d30000"/><circle cx="12" cy="10.5" r="0.7" fill="#d30000"/><circle cx="16" cy="10.5" r="0.7" fill="#d30000"/></svg>
+            Mensaje:
+          </label>
+          <textarea id="mensaje" name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
+        </div>
+
+        <div class="c-boton-wrap">
+          <button type="submit" class="c-boton">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+            Enviar mensaje
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <ul class="c-info">
+      <li>
+        <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg>
+        Dirección
+      </li>
+      <li>
+        <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+        Teléfono
+      </li>
+      <li>
+        <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4.5" width="20" height="15" rx="2"/><polyline points="2.5 6 12 13.5 21.5 6"/></svg>
+        Correo
+      </li>
+      <li>
+        <svg class="c-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Horario de atención
+      </li>
+    </ul>
+
+  </section>
+</main>
+
+<script>
+  document.getElementById('formulario-contacto').addEventListener('submit', function (e) {
+    e.preventDefault();
+    alert('¡Gracias! Tu mensaje fue enviado.');
+    this.reset();
+  });
+</script>
+{% endblock %}
