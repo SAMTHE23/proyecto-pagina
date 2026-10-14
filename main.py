@@ -35,13 +35,13 @@ def contacto():
         if errores:
             for e in errores:
                 flash(e, "error")
-            return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos), 400
+            return render_template("contacto.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos), 400
         flash("¡Gracias! Recibimos tu solicitud y te contactaremos pronto.", "ok")
         return redirect(url_for("contacto"))  
 
     
     datos = {"motivo": request.args.get("motivo", ""), "servicio": request.args.get("servicio", "")}
-    return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos)
+    return render_template("contacto.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos)
 
 
 if __name__ == "__main__":
