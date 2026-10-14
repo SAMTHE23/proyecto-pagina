@@ -6,7 +6,7 @@ from services import MOTIVOS, SERVICIOS, ContactoService
 NOMBRE_SITIO = "Autobots"
 
 app = Flask(__name__)
-app.secret_key = "cambia-esta-clave-en-produccion"  # necesaria para flash()
+app.secret_key = "cambia-esta-clave-en-produccion"  
 
 vehiculos_repo = VehiculoRepository()
 contacto_service = ContactoService(ContactoRepository())
@@ -37,9 +37,9 @@ def contacto():
                 flash(e, "error")
             return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos), 400
         flash("¡Gracias! Recibimos tu solicitud y te contactaremos pronto.", "ok")
-        return redirect(url_for("contacto"))  # evita reenviar el formulario al refrescar
+        return redirect(url_for("contacto"))  
 
-    # GET: permite llegar desde Servicios con el formulario ya preseleccionado
+    
     datos = {"motivo": request.args.get("motivo", ""), "servicio": request.args.get("servicio", "")}
     return render_template("contactanos.html", motivos=MOTIVOS, servicios=SERVICIOS, datos=datos)
 
