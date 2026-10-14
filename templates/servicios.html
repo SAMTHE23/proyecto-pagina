@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block titulo %}Servicios{% endblock %}
+
+{% block contenido %}
+  <section class="mant-hero">
+    <h1>Servicio de Mantenimiento</h1>
+    <span class="mant-linea" aria-hidden="true"></span>
+    <p class="mant-subtitulo">MANTÉN TU VEHÍCULO EN LAS MEJORES CONDICIONES</p>
+    <p class="mant-ayuda">Selecciona el servicio que necesitas</p>
+  </section>
+
+  <section class="mant-contenido">
+    <div class="mant-grid">
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3C12 3 5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 3 12 3Z"/>
+        </svg>
+        <h3>Cambio de aceite</h3>
+        <p>Servicio de cambio de aceite para mantener el motor protegido y funcionando correctamente.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+        </svg>
+        <h3>Revisión de frenos</h3>
+        <p>Inspección del sistema de frenos para garantizar seguridad y correcto funcionamiento.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="5" width="14" height="10" rx="1.5"/>
+          <path d="M3 19h18"/>
+        </svg>
+        <h3>Diagnóstico general</h3>
+        <p>Evaluación general del vehículo para identificar posibles fallas o problemas.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M15.5 8.5l-2 5-5 2 2-5Z"/>
+        </svg>
+        <h3>Alineación y balanceo</h3>
+        <p>Verificación y ajuste de las ruedas para mejorar estabilidad y conducción.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/>
+        </svg>
+        <h3>Mantenimiento preventivo</h3>
+        <p>Revisión periódica para prevenir fallas y mantener el vehículo en óptimas condiciones.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+      <article class="mant-card">
+        <svg class="mant-icono" viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="5" y="4.5" width="14" height="16" rx="2"/>
+          <path d="M9 4.5V3h6v1.5"/>
+        </svg>
+        <h3>Revisión general</h3>
+        <p>Inspección de los principales componentes del vehículo para detectar posibles problemas.</p>
+        <a class="mant-enlace" href="#">Ver servicio
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </a>
+      </article>
+
+    </div>
+
+    <div class="mant-accion">
+      <a class="mant-boton" href="#">Agendar Mantenimiento</a>
+    </div>
+  </section>
+  <hr class="divisor">
+{% endblock %}

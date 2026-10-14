@@ -17,6 +17,10 @@ def catalogo():
     busqueda = request.args.get("q", "").strip()
     return render_template("catalogo.html", vehiculos=vehiculos_repo.listar(busqueda), busqueda=busqueda)
 
+@app.get("/servicios")
+def servicios():
+    return render_template("servicios.html")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
