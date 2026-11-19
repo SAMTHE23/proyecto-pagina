@@ -1,15 +1,21 @@
+import os
+
 from flask import Flask, flash, redirect, render_template, request, url_for
 
+from database import Database
 from repositories import ContactoRepository, VehiculoRepository
 from services import MOTIVOS, SERVICIOS, ContactoService
 
 NOMBRE_SITIO = "Autobots"
 
 app = Flask(__name__)
-app.secret_key = "cambia-esta-clave-en-produccion"  
+app.secret_key = os.environ.get("SECRET_KEY")
+if not app.secret_key:
+    raise RuntimeError("Configura la variable de entorno SECRET_KEY antes de iniciar Flask.")
 
-vehiculos_repo = VehiculoRepository()
-contacto_service = ContactoService(ContactoRepository())
+base = Database()
+vehiculos_repo = VehiculoRepository(base)
+contacto_service = ContactoService(ContactoRepository(base))
 
 
 @app.get("/")
@@ -45,4 +51,4 @@ def contacto():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
