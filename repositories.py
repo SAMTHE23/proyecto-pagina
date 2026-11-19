@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from database import Database
+from sqlalchemy import text
 
 
 class BaseRepository(ABC):
@@ -16,23 +16,30 @@ class BaseRepository(ABC):
 
 
 class VehiculoRepository:
-    def listar(self, texto=""):
-        sql, params = "SELECT * FROM vehiculos", []
-        if texto:
-            sql += " WHERE marca LIKE ? OR modelo LIKE ? OR tipo LIKE ?"
-            params = [f"%{texto}%"] * 3
-        with Database().conectar() as con:
-            return con.execute(sql, params).fetchall()
+    def __init__(self, base):
+        self.base = base
+
+    def listar(self, busqueda=""):
+        sql = "SELECT * FROM vehiculos"
+        params = {}
+        if busqueda:
+            sql += " WHERE LOWER(marca) LIKE LOWER(:q) OR LOWER(modelo) LIKE LOWER(:q) OR LOWER(tipo) LIKE LOWER(:q)"
+            params = {"q": f"%{busqueda}%"}
+        with self.base.conectar() as con:
+            return con.execute(text(sql + " ORDER BY id"), params).mappings().all()
 
 
 class ContactoRepository(BaseRepository):
+    def __init__(self, base):
+        self.base = base
+
     def listar(self):
-        with Database().conectar() as con:
-            return con.execute("SELECT * FROM contactos ORDER BY id DESC").fetchall()
+        with self.base.conectar() as con:
+            return con.execute(text("SELECT * FROM contactos ORDER BY id DESC")).mappings().all()
 
     def crear(self, datos: dict):
-        with Database().conectar() as con:
-            con.execute(
+        with self.base.conectar() as con:
+            con.execute(text(
                 "INSERT INTO contactos (nombre, telefono, correo, motivo, servicio, fecha, mensaje) "
-                "VALUES (:nombre, :telefono, :correo, :motivo, :servicio, :fecha, :mensaje)",
-                datos)
+                "VALUES (:nombre, :telefono, :correo, :motivo, :servicio, :fecha, :mensaje)"
+            ), datos)
