@@ -13,12 +13,15 @@
       {% for v in vehiculos %}
       <div class="card">
         <div class="card-img">
-          <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
+          {% if v.imagen %}
+            <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
+          {% endif %}
         </div>
         <div class="card-body">
           <h3>{{ v.marca }} {{ v.modelo }}</h3>
           <div class="year">{{ v.anio }} · {{ v.tipo }}</div>
-          <a class="btn">DETALLES</a>
+          <a class="btn" href="{{ url_for('detalle_vehiculo', vehiculo_id=v.id, q=busqueda or None) }}"
+            aria-label="Detalles de {{ v.marca }} {{ v.modelo }}">DETALLES</a>
         </div>
       </div>
       {% else %}
