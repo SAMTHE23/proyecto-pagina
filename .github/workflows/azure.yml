@@ -1,0 +1,102 @@
+name: Pruebas y despliegue en Azure
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    name: Flask con PostgreSQL
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: autobots
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d autobots"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+      - name: Probar catálogo y formulario
+        env:
+          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/autobots
+          WEBSITE_SITE_NAME: ci
+        run: |
+          export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+          python - <<'PY'
+          from main import app, base
+          from repositories import ContactoRepository
+
+          with app.test_client() as cliente:
+              assert cliente.get("/").status_code == 200
+              catalogo = cliente.get("/catalogo?q=corolla")
+              assert catalogo.status_code == 200
+              assert "Corolla" in catalogo.get_data(as_text=True)
+              assert cliente.post("/contacto", data={}).status_code == 400
+              respuesta = cliente.post("/contacto", data={
+                  "nombre": "Contacto CI",
+                  "telefono": "123",
+                  "motivo": "Información general",
+                  "mensaje": "Prueba de despliegue",
+              }, follow_redirects=True)
+              assert respuesta.status_code == 200
+              assert "Recibimos tu solicitud" in respuesta.get_data(as_text=True)
+
+          contacto = ContactoRepository(base).listar()[0]
+          assert contacto["nombre"] == "Contacto CI"
+          PY
+
+  despliegue:
+    name: Azure App Service
+    needs: pruebas
+    if: github.ref == 'refs/heads/main' && vars.AZURE_WEBAPP_NAME != ''
+    runs-on: ubuntu-latest
+    concurrency: azure-app-service-production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Empaquetar la aplicación
+        run: git archive --format=zip --output="${RUNNER_TEMP}/app.zip" HEAD
+      - name: Autenticar en Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Desplegar
+        id: publicar
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          package: ${{ runner.temp }}/app.zip
+      - name: Comprobar el catálogo en Azure
+        env:
+          WEBAPP_URL: ${{ steps.publicar.outputs.webapp-url }}
+        run: |
+          curl --fail --silent --show-error --retry 6 --retry-all-errors \
+            --retry-delay 10 --max-time 20 --output /dev/null "${WEBAPP_URL%/}/catalogo"
