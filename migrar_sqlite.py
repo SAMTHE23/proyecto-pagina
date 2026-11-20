@@ -1,4 +1,4 @@
-"""Copia el catálogo y las solicitudes desde SQLite hacia Azure SQL."""
+
 
 import argparse
 import os
@@ -21,7 +21,7 @@ def copiar_tabla(origen, destino, tabla):
             select(tabla).where(tabla.c.id == datos["id"])
         ).mappings().one_or_none()
         if existente is None:
-            # SQLAlchemy habilita IDENTITY_INSERT al insertar un ID explícito.
+            
             destino.execute(tabla.insert(), datos)
             copiados += 1
         elif dict(existente) != datos:

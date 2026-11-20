@@ -15,7 +15,7 @@ MOTIVO_MANTENIMIENTO = "Agendar mantenimiento"
 
 
 class ContactoService:
-    """Reglas de negocio del formulario. Recibe el repositorio (inversión de dependencias)."""
+    
 
     def __init__(self, repositorio):
         self.repositorio = repositorio
