@@ -375,3 +375,81 @@ i.mant-icono{
   color:var(--rojo);
   margin-bottom:14px;
 }
+
+.detalle-vehiculo{
+  background:var(--gris-claro);
+  padding:40px 20px 56px;
+}
+.detalle-contenido{
+  max-width:1100px;
+  margin:0 auto;
+}
+.detalle-volver{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--rojo-oscuro);
+  font-weight:600;
+}
+.detalle-vehiculo h1{
+  margin:16px 0 24px;
+  font-size:clamp(2rem, 5vw, 3.2rem);
+  font-weight:800;
+  overflow-wrap:anywhere;
+}
+.detalle-distribucion{
+  display:grid;
+  gap:24px;
+  align-items:start;
+}
+.detalle-con-foto{
+  grid-template-columns:minmax(0, 3fr) minmax(0, 2fr);
+}
+.detalle-foto,
+.detalle-ficha{
+  background:var(--blanco);
+  border:1px solid var(--gris-borde);
+  border-radius:6px;
+}
+.detalle-foto{
+  padding:20px;
+}
+.detalle-foto img{
+  width:100%;
+  aspect-ratio:16 / 9;
+  object-fit:contain;
+}
+.detalle-ficha{
+  padding:24px;
+}
+.detalle-ficha h2{
+  margin-bottom:16px;
+  font-size:1.25rem;
+  font-weight:700;
+}
+.detalle-ficha dl{
+  margin-bottom:24px;
+}
+.detalle-ficha dl div{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  gap:4px 12px;
+  padding:12px 0;
+  border-bottom:1px solid var(--gris-borde);
+}
+.detalle-ficha dd{
+  margin:0;
+  overflow-wrap:anywhere;
+}
+.detalle-ficha .mant-boton{
+  min-width:0;
+  text-align:center;
+}
+.detalle-vehiculo a:focus-visible{
+  outline:2px solid var(--rojo-oscuro);
+  outline-offset:4px;
+}
+@media (max-width:700px){
+  .detalle-con-foto{ grid-template-columns:1fr; }
+}

@@ -20,19 +20,23 @@ class BaseRepository(ABC):
 class VehiculoRepository:
     def __init__(self, base):
         self.base = base
+        self._tabla = "dbo.vehiculos" if base.motor.dialect.name == "mssql" else "vehiculos"
 
     def listar(self, busqueda=""):
-        if self.base.motor.dialect.name == "mssql":
-            tabla = "dbo.vehiculos"
-        else:
-            tabla = "vehiculos"
-        sql = f"SELECT * FROM {tabla}"
+        sql = f"SELECT * FROM {self._tabla}"
         params = {}
         if busqueda:
             sql += " WHERE LOWER(marca) LIKE LOWER(:q) OR LOWER(modelo) LIKE LOWER(:q) OR LOWER(tipo) LIKE LOWER(:q)"
             params = {"q": f"%{busqueda}%"}
         with self.base.conectar() as con:
             return con.execute(text(sql + " ORDER BY id"), params).mappings().all()
+
+    def obtener(self, vehiculo_id):
+        if not -2**63 <= vehiculo_id < 2**63:
+            return None
+        with self.base.conectar() as con:
+            consulta = text(f"SELECT * FROM {self._tabla} WHERE id = :id")
+            return con.execute(consulta, {"id": vehiculo_id}).mappings().one_or_none()
 
 
 class ContactoRepository(BaseRepository):

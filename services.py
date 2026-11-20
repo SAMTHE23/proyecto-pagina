@@ -2,7 +2,8 @@ import re
 from datetime import date
 
 
-MOTIVOS = ["Información general", "Cotizar un vehículo", "Agendar mantenimiento"]
+MOTIVO_COTIZACION = "Cotizar un vehículo"
+MOTIVOS = ["Información general", MOTIVO_COTIZACION, "Agendar mantenimiento"]
 SERVICIOS = [
     "Cambio de aceite",
     "Revisión de frenos",
