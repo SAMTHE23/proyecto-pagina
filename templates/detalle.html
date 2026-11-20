@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% set nombre = ((vehiculo.marca or '') ~ ' ' ~ (vehiculo.modelo or ''))|trim or 'Vehículo' %}
+{% block titulo %}{{ nombre }}{% endblock %}
+
+{% block contenido %}
+  <article class="detalle-vehiculo">
+    <div class="detalle-contenido">
+      <a class="detalle-volver" href="{{ url_for('catalogo', q=busqueda or None) }}">
+        <span aria-hidden="true">←</span> Volver al catálogo
+      </a>
+      <h1>{{ nombre }}</h1>
+
+      <div class="detalle-distribucion{% if vehiculo.imagen %} detalle-con-foto{% endif %}">
+        {% if vehiculo.imagen %}
+          <div class="detalle-foto">
+            <img src="{{ url_for('static', filename='img/' + vehiculo.imagen) }}" alt="{{ nombre }}">
+          </div>
+        {% endif %}
+
+        <section class="detalle-ficha" aria-labelledby="caracteristicas">
+          <h2 id="caracteristicas">Características</h2>
+          <dl>
+            <div>
+              <dt>Año</dt>
+              <dd>{{ vehiculo.anio or 'Sin especificar' }}</dd>
+            </div>
+            <div>
+              <dt>Tipo</dt>
+              <dd>{{ vehiculo.tipo or 'Sin especificar' }}</dd>
+            </div>
+          </dl>
+          <a class="mant-boton" href="{{ url_for('contacto', motivo=motivo_cotizacion, vehiculo=vehiculo.id) }}">
+            Solicitar cotización
+          </a>
+        </section>
+      </div>
+    </div>
+  </article>
+{% endblock %}
