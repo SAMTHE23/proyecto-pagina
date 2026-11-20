@@ -2,7 +2,9 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 
-from sqlalchemy import create_engine, text
+from sqlalchemy import (
+    Column, Integer, MetaData, Table, UnicodeText, create_engine, select, text,
+)
 from sqlalchemy.engine import URL, make_url
 
 VEHICULOS_INICIALES = [
@@ -12,21 +14,68 @@ VEHICULOS_INICIALES = [
 ]
 
 
+ESQUEMA_AZURE_SQL = MetaData(schema="dbo")
+VEHICULOS_SQL = Table(
+    "vehiculos", ESQUEMA_AZURE_SQL,
+    Column("id", Integer, primary_key=True),
+    Column("marca", UnicodeText),
+    Column("modelo", UnicodeText),
+    Column("anio", Integer),
+    Column("tipo", UnicodeText),
+    Column("imagen", UnicodeText),
+)
+CONTACTOS_SQL = Table(
+    "contactos", ESQUEMA_AZURE_SQL,
+    Column("id", Integer, primary_key=True),
+    Column("nombre", UnicodeText, nullable=False),
+    Column("telefono", UnicodeText, nullable=False),
+    Column("correo", UnicodeText),
+    Column("motivo", UnicodeText, nullable=False),
+    Column("servicio", UnicodeText),
+    Column("fecha", UnicodeText),
+    Column("mensaje", UnicodeText),
+    Column("creado", UnicodeText, server_default=text("CONVERT(nvarchar(19), SYSUTCDATETIME(), 120)")),
+)
+
+
+def motor_azure_sql(url):
+    conexion = make_url(url)
+    if conexion.drivername != "mssql+pyodbc":
+        raise ValueError("Usa una URL mssql+pyodbc para Azure SQL.")
+    return create_engine(conexion, pool_pre_ping=True, deprecate_large_types=True)
+
+
+def preparar_tablas_azure_sql(con):
+    resultado = con.execute(text(
+        "SET NOCOUNT ON; IF @@TRANCOUNT = 0 BEGIN TRANSACTION; "
+        "DECLARE @resultado int; "
+        "EXEC @resultado = sys.sp_getapplock "
+        "@Resource = 'autobots:esquema', @LockMode = 'Exclusive', "
+        "@LockOwner = 'Transaction', @LockTimeout = 30000; "
+        "SELECT @resultado;"
+    )).scalar_one()
+    if resultado < 0:
+        raise RuntimeError("No se pudo obtener el bloqueo de inicialización de Azure SQL.")
+    ESQUEMA_AZURE_SQL.create_all(con)
+
+
 class Database:
     def __init__(self):
         url = os.environ.get("DATABASE_URL")
-        if url:
-            conexion = make_url(url)
-            if conexion.drivername not in {"postgresql", "postgresql+psycopg"}:
-                raise RuntimeError("DATABASE_URL debe ser una URL de PostgreSQL.")
-            conexion = conexion.set(drivername="postgresql+psycopg")
-        elif os.environ.get("WEBSITE_SITE_NAME"):
-            raise RuntimeError("Configura DATABASE_URL con la conexión a PostgreSQL en Azure.")
+        if url and make_url(url).drivername == "mssql+pyodbc":
+            self.motor = motor_azure_sql(url)
         else:
-            ruta = Path(__file__).with_name("autobot.db")
-            conexion = URL.create("sqlite", database=str(ruta))
-
-        self.motor = create_engine(conexion, pool_pre_ping=True)
+            if url:
+                conexion = make_url(url)
+                if conexion.drivername not in {"postgresql", "postgresql+psycopg"}:
+                    raise RuntimeError("DATABASE_URL debe apuntar a Azure SQL (mssql+pyodbc) o PostgreSQL.")
+                conexion = conexion.set(drivername="postgresql+psycopg")
+            elif os.environ.get("WEBSITE_SITE_NAME"):
+                raise RuntimeError("Configura DATABASE_URL con la conexión a la base de datos en Azure.")
+            else:
+                ruta = Path(__file__).with_name("autobot.db")
+                conexion = URL.create("sqlite", database=str(ruta))
+            self.motor = create_engine(conexion, pool_pre_ping=True)
         self._crear_tablas()
 
     @contextmanager
@@ -36,6 +85,11 @@ class Database:
 
     def _crear_tablas(self):
         with self.conectar() as con:
+            if con.dialect.name == "mssql":
+                preparar_tablas_azure_sql(con)
+                if not con.execute(select(VEHICULOS_SQL.c.id).limit(1)).first():
+                    con.execute(VEHICULOS_SQL.insert(), VEHICULOS_INICIALES)
+                return
             if con.dialect.name == "postgresql":
                 # Serializa la creación de tablas y la carga inicial entre workers.
                 con.execute(text("SELECT pg_advisory_xact_lock(7143085721)"))
