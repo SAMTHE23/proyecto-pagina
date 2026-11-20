@@ -10,7 +10,25 @@ python -m flask --app main run --debug
 
 Sin `DATABASE_URL`, el desarrollo local usa `autobot.db`. Los datos de ese archivo siguen disponibles en local. Cada nueva terminal necesita definir `SECRET_KEY`.
 
-## Azure App Service (Linux)
+## Azure SQL Database
+
+1. En el entorno que ejecutará Flask y en el de migración, instala **Microsoft ODBC Driver 18 for SQL Server** y las dependencias de `requirements.txt`. En Linux también se necesita unixODBC. Verifica que ambos entornos puedan conectarse al servidor de Azure SQL.
+2. Configura `DATABASE_URL` como variable de entorno. Usa un usuario con permisos para crear tablas en `dbo`, leerlas e insertar registros. Codifica en formato URL los caracteres especiales del usuario, de la contraseña y del nombre de la base. Ejemplo:
+
+   ```text
+   mssql+pyodbc://USUARIO:CONTRASENA@SERVIDOR.database.windows.net:1433/BASE?driver=ODBC+Driver+18+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no
+   ```
+
+3. Si hay datos previos, detén las escrituras y ejecuta el siguiente comando con una copia de SQLite, antes del primer arranque de Flask contra la base de destino.
+
+   ```sh
+   python migrar_sqlite.py ruta/a/autobot.db
+   ```
+
+   La migración conserva los identificadores y las fechas originales. Puedes repetirla con la misma copia. Si un identificador coincide con datos distintos, se revierte toda la ejecución. El script imprime cuántas filas nuevas copió de cada tabla.
+4. Inicia la aplicación con `SECRET_KEY` y `DATABASE_URL` configuradas. Flask crea las tablas al arrancar y carga el catálogo de ejemplo si está vacío. Con la URL de Azure SQL, Flask guarda el catálogo y las solicitudes en esa base sin usar el archivo local.
+
+## Azure App Service con PostgreSQL (Linux)
 
 1. Crea o usa una base en **Azure Database for PostgreSQL Flexible Server**. Asegúrate de que App Service tenga conectividad al servidor y el usuario pueda crear tablas en la base.
 2. En **Configuración → Variables de entorno → Configuración de la aplicación**, guarda `SECRET_KEY` con una clave aleatoria nueva y estable. La clave anterior quedó expuesta en el historial de Git. Guarda también `DATABASE_URL` con la URL de tu base. Codifica en formato URL los caracteres especiales de la contraseña. Ejemplo con valores de muestra:

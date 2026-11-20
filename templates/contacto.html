@@ -29,17 +29,17 @@
       <div class="campo-doble">
         <div class="campo">
           <label for="nombre">Nombre *</label>
-          <input id="nombre" name="nombre" value="{{ datos.nombre or '' }}" required>
+          <input id="nombre" name="nombre" maxlength="120" value="{{ datos.nombre or '' }}" required>
         </div>
         <div class="campo">
           <label for="telefono">Teléfono *</label>
-          <input id="telefono" name="telefono" value="{{ datos.telefono or '' }}" required>
+          <input id="telefono" name="telefono" type="tel" maxlength="30" value="{{ datos.telefono or '' }}" required>
         </div>
       </div>
 
       <div class="campo">
         <label for="correo">Correo</label>
-        <input id="correo" type="email" name="correo" value="{{ datos.correo or '' }}">
+        <input id="correo" type="email" name="correo" maxlength="254" value="{{ datos.correo or '' }}">
       </div>
 
       <div id="bloque-cita" class="campo-doble">
@@ -60,7 +60,7 @@
 
       <div class="campo">
         <label for="mensaje">Mensaje</label>
-        <textarea id="mensaje" name="mensaje" rows="4">{{ datos.mensaje or '' }}</textarea>
+        <textarea id="mensaje" name="mensaje" rows="4" maxlength="2000">{{ datos.mensaje or '' }}</textarea>
       </div>
 
       <button class="btn btn-form" type="submit">ENVIAR</button>
@@ -73,7 +73,13 @@
     const motivo = document.getElementById("motivo");
     const bloque = document.getElementById("bloque-cita");
     function alternar() {
-      bloque.style.display = motivo.value === "Agendar mantenimiento" ? "grid" : "none";
+      const esCita = motivo.value === "Agendar mantenimiento";
+      bloque.style.display = esCita ? "grid" : "none";
+      for (const campo of bloque.querySelectorAll("select, input")) {
+        campo.disabled = !esCita;
+        campo.required = esCita;
+      }
+      document.getElementById("mensaje").required = !esCita;
     }
     motivo.addEventListener("change", alternar);
     alternar();

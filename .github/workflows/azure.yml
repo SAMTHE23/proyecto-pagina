@@ -56,7 +56,7 @@ jobs:
               assert cliente.post("/contacto", data={}).status_code == 400
               respuesta = cliente.post("/contacto", data={
                   "nombre": "Contacto CI",
-                  "telefono": "123",
+                  "telefono": "3001234567",
                   "motivo": "Información general",
                   "mensaje": "Prueba de despliegue",
               }, follow_redirects=True)

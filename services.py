@@ -1,3 +1,7 @@
+import re
+from datetime import date
+
+
 MOTIVOS = ["Información general", "Cotizar un vehículo", "Agendar mantenimiento"]
 SERVICIOS = [
     "Cambio de aceite",
@@ -26,6 +30,9 @@ class ContactoService:
             "fecha": form.get("fecha", "").strip(),
             "mensaje": form.get("mensaje", "").strip(),
         }
+        if datos["motivo"] != MOTIVO_MANTENIMIENTO:
+            datos["servicio"] = ""
+            datos["fecha"] = ""
         errores = self._validar(datos)
         if not errores:
             self.repositorio.crear(datos)
@@ -35,8 +42,23 @@ class ContactoService:
         errores = []
         if not d["nombre"]:
             errores.append("El nombre es obligatorio.")
+        elif len(d["nombre"]) > 120:
+            errores.append("El nombre debe tener máximo 120 caracteres.")
         if not d["telefono"]:
             errores.append("El teléfono es obligatorio.")
+        elif (
+            len(d["telefono"]) > 30
+            or not re.fullmatch(r"\+?[0-9(). -]+", d["telefono"])
+            or not 7 <= sum(c.isdigit() for c in d["telefono"]) <= 15
+        ):
+            errores.append("Ingresa un teléfono válido de 7 a 15 dígitos.")
+        if d["correo"] and (
+            len(d["correo"]) > 254
+            or not re.fullmatch(r"[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+", d["correo"])
+        ):
+            errores.append("Ingresa un correo válido.")
+        if len(d["mensaje"]) > 2000:
+            errores.append("El mensaje debe tener máximo 2000 caracteres.")
         if d["motivo"] not in MOTIVOS:
             errores.append("Selecciona un motivo de contacto.")
         if d["motivo"] == MOTIVO_MANTENIMIENTO:
@@ -44,6 +66,16 @@ class ContactoService:
                 errores.append("Selecciona el servicio que necesitas.")
             if not d["fecha"]:
                 errores.append("Indica la fecha en la que quieres la cita.")
-        elif d["motivo"] and not d["mensaje"]:
+            else:
+                try:
+                    fecha = date.fromisoformat(d["fecha"])
+                    if fecha.isoformat() != d["fecha"]:
+                        raise ValueError
+                except ValueError:
+                    errores.append("Ingresa una fecha válida en formato AAAA-MM-DD.")
+                else:
+                    if fecha < date.today():
+                        errores.append("La fecha de la cita no puede estar en el pasado.")
+        elif d["motivo"] in MOTIVOS and not d["mensaje"]:
             errores.append("Escribe un mensaje.")
         return errores
