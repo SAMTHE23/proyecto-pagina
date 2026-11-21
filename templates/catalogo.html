@@ -14,7 +14,7 @@
       <div class="card">
         <div class="card-img">
           {% if v.imagen %}
-            <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
+            <img src="{{ imagen_url(v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
           {% endif %}
         </div>
         <div class="card-body">

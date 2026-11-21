@@ -9,11 +9,14 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
-from database import CONTACTOS_SQL, VEHICULOS_SQL, motor_azure_sql, preparar_tablas_azure_sql
+from database import CAMPOS_FICHA, CONTACTOS_SQL, VEHICULOS_SQL, motor_azure_sql, preparar_tablas_azure_sql
 
 
 def copiar_tabla(origen, destino, tabla):
-    columnas = ", ".join(tabla.c.keys())
+    columnas_origen = {columna["name"] for columna in origen.execute(f"PRAGMA table_info({tabla.name})")}
+    columnas = ", ".join(
+        nombre for nombre in tabla.c.keys() if nombre not in CAMPOS_FICHA or nombre in columnas_origen
+    )
     copiados = 0
     for fila in origen.execute(f"SELECT {columnas} FROM {tabla.name} ORDER BY id"):
         datos = dict(fila)
@@ -21,10 +24,9 @@ def copiar_tabla(origen, destino, tabla):
             select(tabla).where(tabla.c.id == datos["id"])
         ).mappings().one_or_none()
         if existente is None:
-            
             destino.execute(tabla.insert(), datos)
             copiados += 1
-        elif dict(existente) != datos:
+        elif any(existente[campo] != valor for campo, valor in datos.items()):
             raise ValueError(f"El ID {datos['id']} de {tabla.name} ya contiene otros datos.")
     return copiados
 

@@ -14,13 +14,23 @@
       <div class="detalle-distribucion{% if vehiculo.imagen %} detalle-con-foto{% endif %}">
         {% if vehiculo.imagen %}
           <div class="detalle-foto">
-            <img src="{{ url_for('static', filename='img/' + vehiculo.imagen) }}" alt="{{ nombre }}">
+            <img src="{{ imagen_url(vehiculo.imagen) }}" alt="{{ nombre }}">
           </div>
         {% endif %}
 
         <section class="detalle-ficha" aria-labelledby="caracteristicas">
           <h2 id="caracteristicas">Características</h2>
           <dl>
+            <div>
+              <dt>Precio de referencia</dt>
+              <dd>
+                {% if vehiculo.precio_cop is not none %}
+                  {{ vehiculo.precio_cop | precio_cop }}
+                {% else %}
+                  Consultar precio
+                {% endif %}
+              </dd>
+            </div>
             <div>
               <dt>Año</dt>
               <dd>{{ vehiculo.anio or 'Sin especificar' }}</dd>
@@ -29,6 +39,16 @@
               <dt>Tipo</dt>
               <dd>{{ vehiculo.tipo or 'Sin especificar' }}</dd>
             </div>
+            {% for etiqueta, valor in [
+              ('Motor', vehiculo.motor), ('Transmisión', vehiculo.transmision), ('Combustible', vehiculo.combustible)
+            ] %}
+              {% if valor %}
+                <div>
+                  <dt>{{ etiqueta }}</dt>
+                  <dd>{{ valor }}</dd>
+                </div>
+              {% endif %}
+            {% endfor %}
           </dl>
           <a class="mant-boton" href="{{ url_for('contacto', motivo=motivo_cotizacion, vehiculo=vehiculo.id) }}">
             Solicitar cotización

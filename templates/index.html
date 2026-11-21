@@ -10,7 +10,7 @@
       <a class="btn" href="{{ url_for('catalogo') }}">VER VEHÍCULOS</a>
     </div>
     <div class="hero-img">
-      <img src="{{ url_for('static', filename='img/hero.jpg') }}" alt="Vehículo destacado">
+      <img src="{{ imagen_url('hero.jpg') }}" alt="Vehículo destacado">
     </div>
   </section>
 
@@ -21,7 +21,7 @@
       <div class="card">
         <div class="card-img">
           {% if v.imagen %}
-            <img src="{{ url_for('static', filename='img/' + v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
+            <img src="{{ imagen_url(v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
           {% endif %}
         </div>
         <div class="card-body">
