@@ -20,13 +20,20 @@ class BaseRepository(ABC):
 class VehiculoRepository:
     def __init__(self, base):
         self.base = base
-        self._tabla = "dbo.vehiculos" if base.motor.dialect.name == "mssql" else "vehiculos"
+        sql_server = base.motor.dialect.name == "mssql"
+        self._tabla = "dbo.vehiculos" if sql_server else "vehiculos"
+        self._nombre_completo = "CONCAT(marca, ' ', modelo)" if sql_server else "marca || ' ' || modelo"
 
     def listar(self, busqueda=""):
         sql = f"SELECT * FROM {self._tabla}"
         params = {}
         if busqueda:
-            sql += " WHERE LOWER(marca) LIKE LOWER(:q) OR LOWER(modelo) LIKE LOWER(:q) OR LOWER(tipo) LIKE LOWER(:q)"
+            sql += (
+                " WHERE LOWER(marca) LIKE LOWER(:q)"
+                " OR LOWER(modelo) LIKE LOWER(:q)"
+                " OR LOWER(tipo) LIKE LOWER(:q)"
+                f" OR LOWER({self._nombre_completo}) LIKE LOWER(:q)"
+            )
             params = {"q": f"%{busqueda}%"}
         with self.base.conectar() as con:
             return con.execute(text(sql + " ORDER BY id"), params).mappings().all()
