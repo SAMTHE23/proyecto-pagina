@@ -16,7 +16,7 @@
       <img class="logo-icon" src="{{ imagen_url('logo.png') }}" alt="Logo Autobots">
       Autobots
     </div>
-    <nav>
+    <nav aria-label="Navegación principal">
       <ul>
         <li><a href="{{ url_for('home') }}">Inicio</a></li>
         <li><a href="{{ url_for('catalogo') }}">Catálogo</a></li>
@@ -25,8 +25,8 @@
       </ul>
     </nav>
     <div class="header-right">
-      <form class="buscador" action="{{ url_for('catalogo') }}" method="get">
-        <input type="search" name="q" placeholder="Buscar marca o modelo" value="{{ request.args.get('q', '') }}">
+      <form class="buscador" role="search" action="{{ url_for('catalogo') }}" method="get">
+        <input type="search" name="q" aria-label="Buscar vehículos" placeholder="Buscar marca o modelo" value="{{ request.args.get('q', '') }}">
        <button type="submit" aria-label="Buscar">
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <circle cx="11" cy="11" r="7"></circle>
