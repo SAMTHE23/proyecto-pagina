@@ -1,57 +1,46 @@
 {% extends "base.html" %}
+{% from "tarjeta_vehiculo.html" import tarjeta_vehiculo %}
 
 {% block titulo %}Inicio{% endblock %}
 
 {% block contenido %}
   <section class="hero">
     <div class="hero-text">
-      <h1>ENCUENTRA TU<br><span>PRÓXIMO</span><br>VEHÍCULO</h1>
-      <p>Consulta nuestros vehículos y sus características</p>
-      <a class="btn" href="{{ url_for('catalogo') }}">VER VEHÍCULOS</a>
+      <h1>Encuentra tu <span>próximo carro</span></h1>
+      <p>Explora los modelos del catálogo y pide una cotización del que te guste.</p>
+      <a class="btn" href="{{ url_for('catalogo') }}">Ver el catálogo</a>
     </div>
     <div class="hero-img">
       <img src="{{ imagen_url('hero.jpg') }}" alt="Vehículo destacado">
     </div>
   </section>
 
-    <section class="destacados">
-    <h2>VEHÍCULOS DESTACADOS</h2>
+  <section class="destacados">
+    <h2>Vehículos destacados</h2>
     <div class="cards">
       {% for v in destacados %}
-      <div class="card">
-        <div class="card-img">
-          {% if v.imagen %}
-            <img src="{{ imagen_url(v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <h3>{{ v.marca }} {{ v.modelo }}</h3>
-          <div class="year">{{ v.anio }}</div>
-          <a class="btn" href="{{ url_for('detalle_vehiculo', vehiculo_id=v.id) }}"
-            aria-label="Detalles de {{ v.marca }} {{ v.modelo }}">DETALLES</a>
-        </div>
-      </div>
+        {{ tarjeta_vehiculo(v) }}
       {% endfor %}
     </div>
   </section>
 
   <section class="servicios">
-    <h2>SERVICIOS</h2>
+    <h2>Servicios</h2>
     <div class="serv-grid">
       <div class="serv-card activo">
         <div class="serv-icon">&#128663;</div>
         <h3>Vehículos</h3>
-        <p>Explora nuestro catálogo completo con modelos de todas las categorías.</p>
+        <p>Consulta las características de cada modelo y solicita una cotización.</p>
       </div>
       <div class="serv-card">
         <div class="serv-icon">&#9998;</div>
         <h3>Mantenimiento</h3>
-        <p>Servicio técnico oficial con revisiones, cambio de aceite y garantías.</p>
+        <p>Consulta los servicios de revisión, cambio de aceite y mantenimiento.</p>
       </div>
       <div class="serv-card">
         <div class="serv-icon">&#128197;</div>
         <h3>Citas</h3>
-        <p>Agenda una visita o prueba de manejo en el horario que prefieras.</p>
+        <p>Indica qué día te queda bien para una cita de mantenimiento.</p>
       </div>
     </div>
   </section>

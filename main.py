@@ -1,9 +1,9 @@
 import os
-from urllib.parse import quote, urlsplit
 
 from flask import Flask, abort, flash, redirect, render_template, request, url_for
 
 from database import Database
+from imagenes import elegir_url_imagen
 from repositories import ContactoRepository, VehiculoRepository
 from services import MOTIVO_COTIZACION, MOTIVOS, SERVICIOS, ContactoService
 
@@ -14,31 +14,12 @@ app.secret_key = os.environ.get("SECRET_KEY")
 if not app.secret_key:
     raise RuntimeError("Configura la variable de entorno SECRET_KEY antes de iniciar Flask.")
 
-blob_base_url = os.environ.get("AZURE_BLOB_BASE_URL", "").strip().rstrip("/")
-if blob_base_url:
-    contenedor = urlsplit(blob_base_url)
-    if (
-        contenedor.scheme != "https"
-        or not contenedor.hostname
-        or not contenedor.path
-        or contenedor.username is not None
-        or "?" in blob_base_url
-        or "#" in blob_base_url
-    ):
-        raise RuntimeError("AZURE_BLOB_BASE_URL debe ser la URL HTTPS del contenedor, sin credenciales.")
-app.config["AZURE_BLOB_BASE_URL"] = blob_base_url
+imagen_url = elegir_url_imagen(os.environ.get("AZURE_BLOB_BASE_URL", ""))
+app.add_template_global(imagen_url, name="imagen_url")
 
 base = Database()
 vehiculos_repo = VehiculoRepository(base)
 contacto_service = ContactoService(ContactoRepository(base))
-
-
-@app.template_global()
-def imagen_url(nombre):
-    contenedor = app.config["AZURE_BLOB_BASE_URL"]
-    if contenedor:
-        return f"{contenedor}/{quote(nombre, safe='/')}"
-    return url_for("static", filename=f"img/{nombre}")
 
 
 @app.template_filter("precio_cop")

@@ -1,31 +1,20 @@
 {% extends "base.html" %}
+{% from "tarjeta_vehiculo.html" import tarjeta_vehiculo %}
 
 {% block titulo %}Catálogo{% endblock %}
 
 {% block contenido %}
   <section class="destacados">
     {% if busqueda %}
-      <h2>RESULTADOS PARA "{{ busqueda }}"</h2>
+      <h2>Resultados para «{{ busqueda }}»</h2>
     {% else %}
-      <h2>CATÁLOGO DE VEHÍCULOS</h2>
+      <h2>Catálogo de vehículos</h2>
     {% endif %}
     <div class="cards">
       {% for v in vehiculos %}
-      <div class="card">
-        <div class="card-img">
-          {% if v.imagen %}
-            <img src="{{ imagen_url(v.imagen) }}" alt="{{ v.marca }} {{ v.modelo }}">
-          {% endif %}
-        </div>
-        <div class="card-body">
-          <h3>{{ v.marca }} {{ v.modelo }}</h3>
-          <div class="year">{{ v.anio }} · {{ v.tipo }}</div>
-          <a class="btn" href="{{ url_for('detalle_vehiculo', vehiculo_id=v.id, q=busqueda or None) }}"
-            aria-label="Detalles de {{ v.marca }} {{ v.modelo }}">DETALLES</a>
-        </div>
-      </div>
+        {{ tarjeta_vehiculo(v, busqueda, mostrar_tipo=true) }}
       {% else %}
-      <p>No encontramos vehículos con esa búsqueda.</p>
+        <p>No encontramos carros con esa búsqueda. Prueba con otra marca o modelo.</p>
       {% endfor %}
     </div>
   </section>

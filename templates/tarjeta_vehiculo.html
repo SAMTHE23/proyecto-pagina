@@ -1,0 +1,19 @@
+{% macro tarjeta_vehiculo(vehiculo, busqueda='', mostrar_tipo=false) %}
+  {% set nombre = ((vehiculo.marca or '') ~ ' ' ~ (vehiculo.modelo or ''))|trim or 'Vehículo' %}
+  <article class="card">
+    {% if vehiculo.imagen %}
+      <div class="card-img">
+        <img src="{{ imagen_url(vehiculo.imagen) }}" alt="{{ nombre }}">
+      </div>
+    {% endif %}
+    <div class="card-body">
+      <h3>{{ nombre }}</h3>
+      {% set datos = [vehiculo.anio, vehiculo.tipo if mostrar_tipo else none]|select|list %}
+      {% if datos %}
+        <div class="year">{{ datos|join(' · ') }}</div>
+      {% endif %}
+      <a class="btn" href="{{ url_for('detalle_vehiculo', vehiculo_id=vehiculo.id, q=busqueda or None) }}"
+        aria-label="Ver detalles de {{ nombre }}">Ver detalles</a>
+    </div>
+  </article>
+{% endmacro %}
