@@ -3,14 +3,28 @@ from contextlib import contextmanager
 from pathlib import Path
 
 from sqlalchemy import (
-    Column, Integer, MetaData, Table, UnicodeText, create_engine, select, text,
+    BigInteger, Column, Integer, MetaData, Table, Unicode, UnicodeText, create_engine,
+    inspect, select, text,
 )
 from sqlalchemy.engine import URL, make_url
+from sqlalchemy.schema import CreateColumn
 
+CAMPOS_FICHA = ("precio_cop", "motor", "transmision", "combustible")
+
+# Los precios y las especificaciones son datos de ejemplo para el catálogo inicial.
 VEHICULOS_INICIALES = [
-    {"marca": "Toyota", "modelo": "Corolla", "anio": 2024, "tipo": "Sedán", "imagen": "corolla.png"},
-    {"marca": "Mazda", "modelo": "MX-5", "anio": 2025, "tipo": "Deportivo", "imagen": "mazda.png"},
-    {"marca": "Chevrolet", "modelo": "Equinox", "anio": 2024, "tipo": "SUV", "imagen": "equinox.png"},
+    {
+        "marca": "Toyota", "modelo": "Corolla", "anio": 2024, "tipo": "Sedán", "imagen": "corolla.png",
+        "precio_cop": 105_900_000, "motor": "2.0 L", "transmision": "Automática CVT", "combustible": "Gasolina",
+    },
+    {
+        "marca": "Mazda", "modelo": "MX-5", "anio": 2025, "tipo": "Deportivo", "imagen": "mazda.png",
+        "precio_cop": 154_900_000, "motor": "2.0 L", "transmision": "Manual", "combustible": "Gasolina",
+    },
+    {
+        "marca": "Chevrolet", "modelo": "Equinox", "anio": 2024, "tipo": "SUV", "imagen": "equinox.png",
+        "precio_cop": 132_900_000, "motor": "1.5 L turbo", "transmision": "Automática", "combustible": "Gasolina",
+    },
 ]
 
 
@@ -23,6 +37,10 @@ VEHICULOS_SQL = Table(
     Column("anio", Integer),
     Column("tipo", UnicodeText),
     Column("imagen", UnicodeText),
+    Column("precio_cop", BigInteger),
+    Column("motor", Unicode(120)),
+    Column("transmision", Unicode(120)),
+    Column("combustible", Unicode(120)),
 )
 CONTACTOS_SQL = Table(
     "contactos", ESQUEMA_AZURE_SQL,
@@ -36,6 +54,25 @@ CONTACTOS_SQL = Table(
     Column("mensaje", UnicodeText),
     Column("creado", UnicodeText, server_default=text("CONVERT(nvarchar(19), SYSUTCDATETIME(), 120)")),
 )
+
+
+def agregar_campos_ficha(con, esquema=None):
+    existentes = {columna["name"] for columna in inspect(con).get_columns("vehiculos", schema=esquema)}
+    faltantes = [campo for campo in CAMPOS_FICHA if campo not in existentes]
+    if not faltantes:
+        return
+
+    tabla = "dbo.vehiculos" if esquema else "vehiculos"
+    for campo in faltantes:
+        definicion = CreateColumn(VEHICULOS_SQL.c[campo]).compile(dialect=con.dialect)
+        con.execute(text(f"ALTER TABLE {tabla} ADD {definicion}"))
+
+    # Solo completa columnas nuevas de los tres registros de demostración originales.
+    asignaciones = ", ".join(f"{campo} = :{campo}" for campo in faltantes)
+    con.execute(text(
+        f"UPDATE {tabla} SET {asignaciones} WHERE marca = :marca AND modelo = :modelo "
+        "AND anio = :anio AND tipo = :tipo AND imagen = :imagen"
+    ), VEHICULOS_INICIALES)
 
 
 def motor_azure_sql(url):
@@ -57,6 +94,7 @@ def preparar_tablas_azure_sql(con):
     if resultado < 0:
         raise RuntimeError("No se pudo obtener el bloqueo de inicialización de Azure SQL.")
     ESQUEMA_AZURE_SQL.create_all(con)
+    agregar_campos_ficha(con, esquema="dbo")
 
 
 class Database:
@@ -102,8 +140,10 @@ class Database:
 
             con.execute(text(
                 f"CREATE TABLE IF NOT EXISTS vehiculos (id {clave}, "
-                "marca TEXT, modelo TEXT, anio INTEGER, tipo TEXT, imagen TEXT)"
+                "marca TEXT, modelo TEXT, anio INTEGER, tipo TEXT, imagen TEXT, "
+                "precio_cop BIGINT, motor TEXT, transmision TEXT, combustible TEXT)"
             ))
+            agregar_campos_ficha(con)
             con.execute(text(
                 f"CREATE TABLE IF NOT EXISTS contactos (id {clave}, nombre TEXT NOT NULL, "
                 "telefono TEXT NOT NULL, correo TEXT, motivo TEXT NOT NULL, "
@@ -111,6 +151,7 @@ class Database:
             ))
             if not con.execute(text("SELECT 1 FROM vehiculos LIMIT 1")).first():
                 con.execute(text(
-                    "INSERT INTO vehiculos (marca, modelo, anio, tipo, imagen) "
-                    "VALUES (:marca, :modelo, :anio, :tipo, :imagen)"
+                    "INSERT INTO vehiculos "
+                    "(marca, modelo, anio, tipo, imagen, precio_cop, motor, transmision, combustible) "
+                    "VALUES (:marca, :modelo, :anio, :tipo, :imagen, :precio_cop, :motor, :transmision, :combustible)"
                 ), VEHICULOS_INICIALES)
