@@ -52,7 +52,11 @@ jobs:
               assert cliente.get("/").status_code == 200
               catalogo = cliente.get("/catalogo?q=corolla")
               assert catalogo.status_code == 200
-              assert "Corolla" in catalogo.get_data(as_text=True)
+              assert 'aria-label="Detalles de Toyota Corolla"' in catalogo.get_data(as_text=True)
+
+              por_nombre = cliente.get("/catalogo", query_string={"q": "Toyota Corolla"})
+              assert por_nombre.status_code == 200
+              assert 'aria-label="Detalles de Toyota Corolla"' in por_nombre.get_data(as_text=True)
 
               vehiculo = VehiculoRepository(base).listar("Corolla")[0]
               ruta_detalle = f"/catalogo/{vehiculo['id']}"
