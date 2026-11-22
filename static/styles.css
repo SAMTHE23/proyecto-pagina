@@ -88,7 +88,7 @@
     letter-spacing:0.4px;
     border-radius:4px;
     text-decoration:none;
-    cursor:default;
+    cursor:pointer;
   }
   .hero-img{
     flex:1;
