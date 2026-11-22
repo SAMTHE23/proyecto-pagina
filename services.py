@@ -1,4 +1,4 @@
-import re
+portimport reimport
 from datetime import date
 
 
@@ -50,9 +50,9 @@ class ContactoService:
         elif (
             len(d["telefono"]) > 30
             or not re.fullmatch(r"\+?[0-9(). -]+", d["telefono"])
-            or not 7 <= sum(c.isdigit() for c in d["telefono"]) <= 15
+            or not 10 <= sum(c.isdigit() for c in d["telefono"]) <= 15
         ):
-            errores.append("Ingresa un teléfono válido de 7 a 15 dígitos.")
+            errores.append("El número de teléfono debe tener entre 10 y 15 dígitos.")
         if d["correo"] and (
             len(d["correo"]) > 254
             or not re.fullmatch(r"[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+", d["correo"])
