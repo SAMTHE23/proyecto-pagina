@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sqlalchemy import (
     BigInteger, Column, Integer, MetaData, Table, Unicode, UnicodeText, create_engine,
-    inspect, select, text,
+    inspect, text,
 )
 from sqlalchemy.engine import URL, make_url
 from sqlalchemy.schema import CreateColumn
@@ -93,13 +93,15 @@ def preparar_tablas_azure_sql(con):
     )).scalar_one()
     if resultado < 0:
         raise RuntimeError("No se pudo obtener el bloqueo de inicialización de Azure SQL.")
+    tabla_nueva = not inspect(con).has_table("vehiculos", schema="dbo")
     ESQUEMA_AZURE_SQL.create_all(con)
     agregar_campos_ficha(con, esquema="dbo")
+    return tabla_nueva
 
 
 class Database:
-    def __init__(self):
-        url = os.environ.get("DATABASE_URL")
+    def __init__(self, *, url_conexion: str | None = None, ruta_sqlite: Path | None = None):
+        url = os.environ.get("DATABASE_URL") if url_conexion is None else url_conexion
         if url and make_url(url).drivername == "mssql+pyodbc":
             self.motor = motor_azure_sql(url)
         else:
@@ -108,10 +110,10 @@ class Database:
                 if conexion.drivername not in {"postgresql", "postgresql+psycopg"}:
                     raise RuntimeError("DATABASE_URL debe apuntar a Azure SQL (mssql+pyodbc) o PostgreSQL.")
                 conexion = conexion.set(drivername="postgresql+psycopg")
-            elif os.environ.get("WEBSITE_SITE_NAME"):
+            elif ruta_sqlite is None and os.environ.get("WEBSITE_SITE_NAME"):
                 raise RuntimeError("Configura DATABASE_URL con la conexión a la base de datos en Azure.")
             else:
-                ruta = Path(__file__).with_name("autobot.db")
+                ruta = ruta_sqlite or Path(__file__).with_name("autobot.db")
                 conexion = URL.create("sqlite", database=str(ruta))
             self.motor = create_engine(conexion, pool_pre_ping=True)
         self._crear_tablas()
@@ -124,8 +126,7 @@ class Database:
     def _crear_tablas(self):
         with self.conectar() as con:
             if con.dialect.name == "mssql":
-                preparar_tablas_azure_sql(con)
-                if not con.execute(select(VEHICULOS_SQL.c.id).limit(1)).first():
+                if preparar_tablas_azure_sql(con):
                     con.execute(VEHICULOS_SQL.insert(), VEHICULOS_INICIALES)
                 return
             if con.dialect.name == "postgresql":
@@ -138,6 +139,7 @@ class Database:
                 clave = "INTEGER PRIMARY KEY AUTOINCREMENT"
                 fecha_creacion = "TEXT DEFAULT CURRENT_TIMESTAMP"
 
+            tabla_nueva = not inspect(con).has_table("vehiculos")
             con.execute(text(
                 f"CREATE TABLE IF NOT EXISTS vehiculos (id {clave}, "
                 "marca TEXT, modelo TEXT, anio INTEGER, tipo TEXT, imagen TEXT, "
@@ -149,7 +151,7 @@ class Database:
                 "telefono TEXT NOT NULL, correo TEXT, motivo TEXT NOT NULL, "
                 f"servicio TEXT, fecha TEXT, mensaje TEXT, creado {fecha_creacion})"
             ))
-            if not con.execute(text("SELECT 1 FROM vehiculos LIMIT 1")).first():
+            if tabla_nueva:
                 con.execute(text(
                     "INSERT INTO vehiculos "
                     "(marca, modelo, anio, tipo, imagen, precio_cop, motor, transmision, combustible) "

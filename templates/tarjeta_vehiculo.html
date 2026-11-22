@@ -12,7 +12,11 @@
       {% if datos %}
         <div class="year">{{ datos|join(' · ') }}</div>
       {% endif %}
-      <a class="btn" href="{{ url_for('detalle_vehiculo', vehiculo_id=vehiculo.id, q=busqueda or None) }}"
+      {% set detalle = url_for('detalle_vehiculo', vehiculo_id=vehiculo.id) %}
+      {% if busqueda %}
+        {% set detalle = detalle.include_query_params(q=busqueda) %}
+      {% endif %}
+      <a class="btn" href="{{ detalle }}"
         aria-label="Ver detalles de {{ nombre }}">Ver detalles</a>
     </div>
   </article>

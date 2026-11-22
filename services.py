@@ -1,5 +1,7 @@
 import re
+from collections.abc import Mapping
 from datetime import date
+from typing import Protocol
 
 
 MOTIVO_COTIZACION = "Cotizar un vehículo"
@@ -15,13 +17,15 @@ SERVICIOS = [
 MOTIVO_MANTENIMIENTO = "Agendar mantenimiento"
 
 
-class ContactoService:
-    
+class RegistroContactos(Protocol):
+    def crear(self, datos: dict[str, str]) -> None: ...
 
-    def __init__(self, repositorio):
+
+class ContactoService:
+    def __init__(self, repositorio: RegistroContactos):
         self.repositorio = repositorio
 
-    def registrar(self, form):
+    def registrar(self, form: Mapping[str, str]) -> tuple[dict[str, str], list[str]]:
         datos = {
             "nombre": form.get("nombre", "").strip(),
             "telefono": form.get("telefono", "").strip(),
@@ -39,7 +43,7 @@ class ContactoService:
             self.repositorio.crear(datos)
         return datos, errores
 
-    def _validar(self, d):
+    def _validar(self, d: dict[str, str]) -> list[str]:
         errores = []
         if not d["nombre"]:
             errores.append("El nombre es obligatorio.")

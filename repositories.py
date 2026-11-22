@@ -1,8 +1,10 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import select, text
+from sqlalchemy import MetaData, false, select, text
 
-from database import CONTACTOS_SQL
+from database import CONTACTOS_SQL, VEHICULOS_SQL
+
+TABLA_VEHICULOS = VEHICULOS_SQL.to_metadata(MetaData(), schema=None)
 
 
 class BaseRepository(ABC):
@@ -21,11 +23,12 @@ class VehiculoRepository:
     def __init__(self, base):
         self.base = base
         sql_server = base.motor.dialect.name == "mssql"
-        self._tabla = "dbo.vehiculos" if sql_server else "vehiculos"
+        self._tabla = VEHICULOS_SQL if sql_server else TABLA_VEHICULOS
+        self._limite_id = 2**63 if base.motor.dialect.name == "sqlite" else 2**31
         self._nombre_completo = "CONCAT(marca, ' ', modelo)" if sql_server else "marca || ' ' || modelo"
 
     def listar(self, busqueda=""):
-        sql = f"SELECT * FROM {self._tabla}"
+        sql = f"SELECT * FROM {self._tabla.fullname}"
         params = {}
         if busqueda:
             sql += (
@@ -38,12 +41,41 @@ class VehiculoRepository:
         with self.base.conectar() as con:
             return con.execute(text(sql + " ORDER BY id"), params).mappings().all()
 
+    def _por_id(self, vehiculo_id):
+        if not -self._limite_id <= vehiculo_id < self._limite_id:
+            return false()
+        return self._tabla.c.id == vehiculo_id
+
     def obtener(self, vehiculo_id):
-        if not -2**63 <= vehiculo_id < 2**63:
-            return None
         with self.base.conectar() as con:
-            consulta = text(f"SELECT * FROM {self._tabla} WHERE id = :id")
-            return con.execute(consulta, {"id": vehiculo_id}).mappings().one_or_none()
+            consulta = select(self._tabla).where(self._por_id(vehiculo_id))
+            return con.execute(consulta).mappings().one_or_none()
+
+    def crear(self, datos):
+        with self.base.conectar() as con:
+            consulta = self._tabla.insert().returning(*self._tabla.c)
+            return con.execute(consulta, datos).mappings().one()
+
+    def actualizar(self, vehiculo_id, datos):
+        if not datos:
+            return self.obtener(vehiculo_id)
+        with self.base.conectar() as con:
+            consulta = (
+                self._tabla.update()
+                .where(self._por_id(vehiculo_id))
+                .values(datos)
+                .returning(*self._tabla.c)
+            )
+            return con.execute(consulta).mappings().one_or_none()
+
+    def eliminar(self, vehiculo_id):
+        with self.base.conectar() as con:
+            consulta = (
+                self._tabla.delete()
+                .where(self._por_id(vehiculo_id))
+                .returning(self._tabla.c.id)
+            )
+            return con.execute(consulta).scalar_one_or_none() is not None
 
 
 class ContactoRepository(BaseRepository):

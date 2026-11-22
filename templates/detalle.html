@@ -6,7 +6,11 @@
 {% block contenido %}
   <article class="detalle-vehiculo">
     <div class="detalle-contenido">
-      <a class="detalle-volver" href="{{ url_for('catalogo', q=busqueda or None) }}">
+      {% set volver_catalogo = url_for('catalogo') %}
+      {% if busqueda %}
+        {% set volver_catalogo = volver_catalogo.include_query_params(q=busqueda) %}
+      {% endif %}
+      <a class="detalle-volver" href="{{ volver_catalogo }}">
         <span aria-hidden="true">←</span> Volver al catálogo
       </a>
       <h1>{{ nombre }}</h1>
@@ -50,7 +54,7 @@
               {% endif %}
             {% endfor %}
           </dl>
-          <a class="mant-boton" href="{{ url_for('contacto', motivo=motivo_cotizacion, vehiculo=vehiculo.id) }}">
+          <a class="mant-boton" href="{{ url_for('contacto').include_query_params(motivo=motivo_cotizacion, vehiculo=vehiculo.id) }}">
             Solicitar cotización
           </a>
         </section>

@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   pruebas:
-    name: Flask con PostgreSQL
+    name: FastAPI con PostgreSQL
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -36,57 +36,13 @@ jobs:
         with:
           python-version: '3.12'
           cache: pip
-      - name: Instalar dependencias
-        run: python -m pip install -r requirements.txt
-      - name: Probar catálogo, ficha y formulario
+      - name: Instalar dependencias de pruebas
+        run: python -m pip install -r requirements-dev.txt
+      - name: Probar páginas, formulario y API
         env:
-          DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/autobots
+          TEST_DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/autobots
           WEBSITE_SITE_NAME: ci
-        run: |
-          export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
-          python - <<'PY'
-          from main import app, base
-          from repositories import ContactoRepository, VehiculoRepository
-
-          vehiculo = VehiculoRepository(base).listar("Corolla")[0]
-          ruta_detalle = f"/catalogo/{vehiculo['id']}"
-
-          with app.test_client() as cliente:
-              assert cliente.get("/").status_code == 200
-              for consulta in ("corolla", "Toyota Corolla"):
-                  catalogo = cliente.get("/catalogo", query_string={"q": consulta})
-                  assert catalogo.status_code == 200
-                  assert f'href="{ruta_detalle}?' in catalogo.get_data(as_text=True)
-
-              ficha = cliente.get(ruta_detalle)
-              assert ficha.status_code == 200
-              detalle = ficha.get_data(as_text=True)
-              assert "COP" in detalle and "Transmisión" in detalle
-              assert "/static/img/corolla.png" in detalle
-
-              assert cliente.post("/contacto", data={}).status_code == 400
-              respuesta = cliente.post("/contacto", data={
-                  "nombre": "Contacto CI",
-                  "telefono": "3001234567",
-                  "motivo": "Información general",
-                  "mensaje": "Prueba de despliegue",
-              }, follow_redirects=True)
-              assert respuesta.status_code == 200
-              assert "Recibimos tu solicitud" in respuesta.get_data(as_text=True)
-
-          contacto = ContactoRepository(base).listar()[0]
-          assert contacto["nombre"] == "Contacto CI"
-          PY
-
-          AZURE_BLOB_BASE_URL=https://prueba.blob.core.windows.net/imagenes python - <<'PY'
-          from main import app, vehiculos_repo
-
-          vehiculo = vehiculos_repo.listar("Corolla")[0]
-          with app.test_client() as cliente:
-              ficha = cliente.get(f"/catalogo/{vehiculo['id']}")
-              assert ficha.status_code == 200
-              assert "https://prueba.blob.core.windows.net/imagenes/corolla.png" in ficha.get_data(as_text=True)
-          PY
+        run: python -m unittest discover -s tests -v
 
   despliegue:
     name: Azure App Service
@@ -115,6 +71,7 @@ jobs:
         with:
           app-name: ${{ vars.AZURE_WEBAPP_NAME }}
           package: ${{ runner.temp }}/app.zip
+          startup-command: python -m uvicorn main:app --host 0.0.0.0 --port 8000
       - name: Comprobar el catálogo en Azure
         env:
           WEBAPP_URL: ${{ steps.publicar.outputs.webapp-url }}
