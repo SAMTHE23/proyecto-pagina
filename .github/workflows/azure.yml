@@ -48,28 +48,21 @@ jobs:
           from main import app, base
           from repositories import ContactoRepository, VehiculoRepository
 
+          vehiculo = VehiculoRepository(base).listar("Corolla")[0]
+          ruta_detalle = f"/catalogo/{vehiculo['id']}"
+
           with app.test_client() as cliente:
               assert cliente.get("/").status_code == 200
-              catalogo = cliente.get("/catalogo?q=corolla")
-              assert catalogo.status_code == 200
-              assert 'aria-label="Detalles de Toyota Corolla"' in catalogo.get_data(as_text=True)
+              for consulta in ("corolla", "Toyota Corolla"):
+                  catalogo = cliente.get("/catalogo", query_string={"q": consulta})
+                  assert catalogo.status_code == 200
+                  assert f'href="{ruta_detalle}?' in catalogo.get_data(as_text=True)
 
-              por_nombre = cliente.get("/catalogo", query_string={"q": "Toyota Corolla"})
-              assert por_nombre.status_code == 200
-              assert 'aria-label="Detalles de Toyota Corolla"' in por_nombre.get_data(as_text=True)
-
-              vehiculo = VehiculoRepository(base).listar("Corolla")[0]
-              ruta_detalle = f"/catalogo/{vehiculo['id']}"
               ficha = cliente.get(ruta_detalle)
               assert ficha.status_code == 200
               detalle = ficha.get_data(as_text=True)
               assert "COP" in detalle and "Transmisión" in detalle
               assert "/static/img/corolla.png" in detalle
-
-              app.config["AZURE_BLOB_BASE_URL"] = "https://prueba.blob.core.windows.net/imagenes"
-              ficha_blob = cliente.get(ruta_detalle).get_data(as_text=True)
-              assert "https://prueba.blob.core.windows.net/imagenes/corolla.png" in ficha_blob
-              app.config["AZURE_BLOB_BASE_URL"] = ""
 
               assert cliente.post("/contacto", data={}).status_code == 400
               respuesta = cliente.post("/contacto", data={
@@ -83,6 +76,16 @@ jobs:
 
           contacto = ContactoRepository(base).listar()[0]
           assert contacto["nombre"] == "Contacto CI"
+          PY
+
+          AZURE_BLOB_BASE_URL=https://prueba.blob.core.windows.net/imagenes python - <<'PY'
+          from main import app, vehiculos_repo
+
+          vehiculo = vehiculos_repo.listar("Corolla")[0]
+          with app.test_client() as cliente:
+              ficha = cliente.get(f"/catalogo/{vehiculo['id']}")
+              assert ficha.status_code == 200
+              assert "https://prueba.blob.core.windows.net/imagenes/corolla.png" in ficha.get_data(as_text=True)
           PY
 
   despliegue:
