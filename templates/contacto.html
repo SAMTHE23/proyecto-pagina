@@ -32,7 +32,10 @@
         </div>
         <div class="campo">
           <label for="telefono">Teléfono *</label>
-          <input id="telefono" name="telefono" type="tel" maxlength="30" value="{{ datos.telefono or '' }}" required>
+          <input id="telefono" name="telefono" type="tel" maxlength="30"
+       pattern="\s*\+?(?:[\(\). \-]*[0-9]){10,15}[\(\). \-]*\s*"
+       title="Ingresa un teléfono de 10 a 15 dígitos."
+       value="{{ datos.telefono or '' }}" required>
         </div>
       </div>
 
