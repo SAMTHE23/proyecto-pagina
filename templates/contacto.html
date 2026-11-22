@@ -10,7 +10,7 @@
   </section>
 
   <section class="contacto-contenido">
-    {% for categoria, msg in get_flashed_messages(with_categories=true) %}
+    {% for categoria, msg in avisos %}
       <p class="aviso {{ categoria }}">{{ msg }}</p>
     {% endfor %}
 
