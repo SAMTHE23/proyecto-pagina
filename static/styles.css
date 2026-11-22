@@ -152,11 +152,11 @@
   }
   .serv-grid .serv-card{ flex:1 1 240px; }
   .serv-card{
-    border: 1px solid var(--gris-borde);
+    background-color: #f5f5f5;
+    border: 1px solid #c8c8c8;
     border-radius:6px;
     padding:28px 20px;
   }
-  .serv-card.activo{ border-color: var(--rojo); }
   .serv-icon{
     width:44px;
     height:44px;
@@ -172,10 +172,8 @@
   .serv-card h3{
     font-size:1rem;
     margin-bottom:10px;
-    color: var(--rojo);
+    color: var(--negro);
   }
-  .serv-card.activo h3{ color: var(--rojo); }
-  .serv-card:not(.activo) h3{ color: var(--negro); }
   .serv-card p{
     font-size:0.85rem;
     color:#666;
