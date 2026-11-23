@@ -6,6 +6,7 @@ from starlette.datastructures import FormData
 from services import MOTIVO_COTIZACION, MOTIVOS, SERVICIOS
 
 router = APIRouter(default_response_class=HTMLResponse)
+
 NOMBRE_SITIO = "Autobots"
 CONFIRMACION_CONTACTO = "¡Gracias! Recibimos tu solicitud y te contactaremos pronto."
 
@@ -16,6 +17,39 @@ def adaptar_formulario(formulario: FormData) -> dict[str, str]:
     for campo, valor in formulario.multi_items():
         if isinstance(valor, str):
             datos.setdefault(campo, valor)
+    return datos
+
+
+def _leer_id_vehiculo(texto: str) -> int:
+    try:
+        if not texto.removeprefix("-").isdecimal():
+            raise ValueError
+        return int(texto)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Vehículo no encontrado.") from None
+
+
+def _mensaje_cotizacion(texto_id, vehiculos_repo):
+    try:
+        vehiculo_id = int(texto_id)
+    except ValueError:
+        return None
+    vehiculo = vehiculos_repo.obtener(vehiculo_id)
+    if vehiculo is None:
+        return None
+    descripcion = " ".join(
+        str(vehiculo[campo]) for campo in ("marca", "modelo", "anio") if vehiculo[campo]
+    )
+    referencia = f"el vehículo {descripcion}" if descripcion else "este vehículo"
+    return f"Hola, me interesa cotizar {referencia}."
+
+
+def _datos_iniciales_contacto(parametros, vehiculos_repo) -> dict[str, str]:
+    datos = {"motivo": parametros.get("motivo", ""), "servicio": parametros.get("servicio", "")}
+    if datos["motivo"] == MOTIVO_COTIZACION:
+        mensaje = _mensaje_cotizacion(parametros.get("vehiculo", ""), vehiculos_repo)
+        if mensaje is not None:
+            datos["mensaje"] = mensaje
     return datos
 
 
@@ -42,13 +76,7 @@ def catalogo(request: Request):
 
 @router.get("/catalogo/{vehiculo_id}")
 def detalle_vehiculo(request: Request, vehiculo_id: str):
-    try:
-        if not vehiculo_id.removeprefix("-").isdecimal():
-            raise ValueError
-        identificador = int(vehiculo_id)
-    except ValueError:
-        raise HTTPException(status_code=404, detail="Vehículo no encontrado.") from None
-
+    identificador = _leer_id_vehiculo(vehiculo_id)
     vehiculo = request.app.state.vehiculos_repo.obtener(identificador)
     if vehiculo is None:
         raise HTTPException(status_code=404, detail="Vehículo no encontrado.")
@@ -81,22 +109,7 @@ def _renderizar_contacto(
 
 @router.get("/contacto")
 def contacto(request: Request):
-    parametros = request.query_params
-    datos = {"motivo": parametros.get("motivo", ""), "servicio": parametros.get("servicio", "")}
-    if datos["motivo"] == MOTIVO_COTIZACION:
-        try:
-            vehiculo_id = int(parametros.get("vehiculo", ""))
-        except ValueError:
-            pass
-        else:
-            vehiculo = request.app.state.vehiculos_repo.obtener(vehiculo_id)
-            if vehiculo is not None:
-                descripcion = " ".join(
-                    str(vehiculo[campo]) for campo in ("marca", "modelo", "anio") if vehiculo[campo]
-                )
-                referencia = f"el vehículo {descripcion}" if descripcion else "este vehículo"
-                datos["mensaje"] = f"Hola, me interesa cotizar {referencia}."
-
+    datos = _datos_iniciales_contacto(request.query_params, request.app.state.vehiculos_repo)
     avisos = [("ok", CONFIRMACION_CONTACTO)] if request.session.pop("contacto_confirmado", False) else []
     return _renderizar_contacto(request, datos, avisos)
 
@@ -110,6 +123,5 @@ async def registrar_contacto(request: Request):
     )
     if errores:
         return _renderizar_contacto(request, datos, [("error", error) for error in errores], 400)
-
     request.session["contacto_confirmado"] = True
     return RedirectResponse(request.url_for("contacto").path, status_code=303)
