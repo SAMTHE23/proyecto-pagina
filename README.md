@@ -116,7 +116,7 @@ En la pestaña **Actions**, revisa que pasen las pruebas, que termine el desplie
 
 | Principio SOLID | Evidencia |
 | --- | --- |
-| Responsabilidad única | `rutas_web.py` maneja HTML, `api_vehiculos.py` maneja la API y los repositorios manejan SQL. La clase `Database` reúne la conexión y la inicialización del esquema para conservar la compatibilidad con las tres bases admitidas. |
+| Responsabilidad única     | `rutas_web.py` maneja HTML, `api_vehiculos.py` maneja la API y los repositorios manejan SQL. `Database` solo guarda el motor y entrega conexiones; `crear_motor` elige la base, `crear_tablas` prepara el esquema y los datos de ejemplo están en constantes aparte. `ContactoService` solo coordina el registro y `ValidadorContacto` se encarga de validar. `crear_app` solo ensambla la aplicación, con `cargar_configuracion` y `configurar_plantillas` como funciones propias. |
 | Abierto/cerrado | La prueba registra una tercera estrategia mediante el parámetro `estrategia_imagen` de la fábrica y conserva la misma llamada en las plantillas. |
 | Sustitución de Liskov | La prueba del servicio pasa un registro en memoria que cumple el mismo contrato de guardado que el repositorio SQL. |
 | Segregación de interfaces | El servicio depende de `RegistroContactos`, que solo exige `crear`. |
